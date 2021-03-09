@@ -180,9 +180,8 @@ __Z_INLINE parser_error_t parser_formatAmount(uint16_t amountToken,
             return parser_unexpected_error;
         }
 
-        const uint16_t formatted_len =strlen(bufferUI);
-        bufferUI[formatted_len] = ' ';
-        MEMCPY(bufferUI + 1 + formatted_len, COIN_DEFAULT_DENOM_REPR, strlen(COIN_DEFAULT_DENOM_REPR));
+        strcat(bufferUI, " ");
+        strcat(bufferUI, COIN_DEFAULT_DENOM_REPR);
     } else {
         MEMCPY(bufferUI, amountPtr, amountLen);
         bufferUI[amountLen] = ' ';
@@ -212,7 +211,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
         return parser_unexpected_number_items;
     }
 
-    if (displayIdx < 0 || displayIdx >= numItems) {
+    if (displayIdx >= numItems) {
         return parser_display_idx_out_of_range;
     }
 

@@ -44,8 +44,9 @@ unsigned char io_event(unsigned char channel) {
             break;
 
         case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
-            if (!UX_DISPLAYED())
+            if (!UX_DISPLAYED()) {
                 UX_DISPLAYED_EVENT();
+            }
             break;
 
         case SEPROXYHAL_TAG_TICKER_EVENT: { //

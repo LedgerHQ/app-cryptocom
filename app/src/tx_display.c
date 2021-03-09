@@ -371,7 +371,7 @@ parser_error_t tx_display_query(uint16_t displayIdx,
     uint8_t num_items;
     CHECK_PARSER_ERR(tx_display_numItems(&num_items));
 
-    if (displayIdx < 0 || displayIdx >= num_items) {
+    if (displayIdx >= num_items) {
         return parser_display_idx_out_of_range;
     }
 
