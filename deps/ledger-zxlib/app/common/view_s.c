@@ -41,6 +41,7 @@ void view_sign_show_s();
 ux_state_t ux;
 
 void os_exit(uint32_t id) {
+    (void) id;
     os_sched_exit(0);
 }
 
@@ -135,6 +136,8 @@ static unsigned int view_address_button(unsigned int button_mask, unsigned int b
 #endif
 
 static unsigned int view_error_button(unsigned int button_mask, unsigned int button_mask_counter) {
+    (void) button_mask_counter;
+
     switch (button_mask) {
         case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT:
         case BUTTON_EVT_RELEASED | BUTTON_LEFT:
@@ -147,6 +150,8 @@ static unsigned int view_error_button(unsigned int button_mask, unsigned int but
 }
 
 static unsigned int view_review_button(unsigned int button_mask, unsigned int button_mask_counter) {
+    (void) button_mask_counter;
+
     switch (button_mask) {
         case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT:
             if (app_mode_expert()) {

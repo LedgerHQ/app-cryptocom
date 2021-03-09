@@ -29,6 +29,8 @@ void app_set_hrp(char *p);
 extern uint8_t action_addr_len;
 
 __Z_INLINE uint8_t app_fill_address(address_kind_e kind) {
+    (void) kind;
+
     // Put data directly in the apdu buffer
     MEMZERO(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE);
 
@@ -45,6 +47,8 @@ __Z_INLINE uint8_t app_fill_address(address_kind_e kind) {
 }
 
 __Z_INLINE void app_reply_address(address_kind_e kind) {
+    (void) kind;
+
     set_code(G_io_apdu_buffer, action_addr_len, APDU_CODE_OK);
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, action_addr_len + 2);
 }

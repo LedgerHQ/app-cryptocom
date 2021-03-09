@@ -51,6 +51,11 @@ void handle_stack_overflow();
 
 #define NV_ALIGN __attribute__ ((aligned(64)))
 
+#define MEMMOVE memmove
+#define MEMSET memset
+#define MEMCPY memcpy
+#define MEMCMP memcmp
+
 #if defined (TARGET_NANOS) || defined(TARGET_NANOX)
 
 __Z_INLINE void debug_log(char *buf)
@@ -91,10 +96,6 @@ extern unsigned int app_stack_canary;
 #define IS_UX_ALLOWED (ux.params.len != BOLOS_UX_IGNORE && ux.params.len != BOLOS_UX_CONTINUE)
 #endif
 
-#define MEMMOVE os_memmove
-#define MEMSET os_memset
-#define MEMCPY os_memcpy
-#define MEMCMP os_memcmp
 #define MEMCPY_NV nvm_write
 #define MEMZERO explicit_bzero
 
@@ -102,10 +103,6 @@ extern unsigned int app_stack_canary;
 
 #define CHECK_APP_CANARY() {}
 
-#define MEMMOVE memmove
-#define MEMSET memset
-#define MEMCPY memcpy
-#define MEMCMP memcmp
 #define MEMCPY_NV memcpy
 
 #define CX_ECCINFO_PARITY_ODD 1u
