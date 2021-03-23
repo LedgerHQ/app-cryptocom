@@ -180,8 +180,8 @@ __Z_INLINE parser_error_t parser_formatAmount(uint16_t amountToken,
             return parser_unexpected_error;
         }
 
-        strcat(bufferUI, " ");
-        strcat(bufferUI, COIN_DEFAULT_DENOM_REPR);
+        strlcat(bufferUI, " ", sizeof(bufferUI));
+        strlcat(bufferUI, COIN_DEFAULT_DENOM_REPR, sizeof(bufferUI));
     } else {
         MEMCPY(bufferUI, amountPtr, amountLen);
         bufferUI[amountLen] = ' ';

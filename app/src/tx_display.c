@@ -208,7 +208,7 @@ parser_error_t tx_indexRootFields() {
                             if (strlen(tmp_val) >= sizeof(reference_msg_type)) {
                                 return parser_unexpected_type;
                             }
-                            strcpy(reference_msg_type, tmp_val);
+                            strlcpy(reference_msg_type, tmp_val, sizeof(reference_msg_type));
                             parser_tx_obj.filter_msg_type_valid_idx = current_item_idx;
                         }
 
@@ -225,7 +225,7 @@ parser_error_t tx_indexRootFields() {
                     if (parser_tx_obj.flags.msg_from_grouping && is_msg_from_field(tmp_key)) {
                         // First message, initialize expected from
                         if (parser_tx_obj.filter_msg_from_count == 0) {
-                            strcpy(reference_msg_from, tmp_val);
+                            strlcpy(reference_msg_from, tmp_val, sizeof(reference_msg_from));
                             parser_tx_obj.filter_msg_from_valid_idx = current_item_idx;
                         }
 
