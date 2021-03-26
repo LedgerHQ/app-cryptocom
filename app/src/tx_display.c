@@ -189,7 +189,7 @@ parser_error_t tx_indexRootFields() {
             CHECK_PARSER_ERR(tx_getToken(
                     ret_value_token_index,
                     parser_tx_obj.query.out_val,
-                    parser_tx_obj.query.out_key_len,
+                    parser_tx_obj.query.out_val_len,
                     0, &pageCount))
 
             switch (root_item_idx) {
@@ -205,7 +205,10 @@ parser_error_t tx_indexRootFields() {
                     if (parser_tx_obj.flags.msg_type_grouping && is_msg_type_field(tmp_key)) {
                         // First message, initialize expected type
                         if (parser_tx_obj.filter_msg_type_count == 0) {
-                            strcpy(reference_msg_type, tmp_val);
+                            if (strlen(tmp_val) >= sizeof(reference_msg_type)) {
+                                return parser_unexpected_type;
+                            }
+                            strlcpy(reference_msg_type, tmp_val, sizeof(reference_msg_type));
                             parser_tx_obj.filter_msg_type_valid_idx = current_item_idx;
                         }
 
@@ -222,7 +225,7 @@ parser_error_t tx_indexRootFields() {
                     if (parser_tx_obj.flags.msg_from_grouping && is_msg_from_field(tmp_key)) {
                         // First message, initialize expected from
                         if (parser_tx_obj.filter_msg_from_count == 0) {
-                            strcpy(reference_msg_from, tmp_val);
+                            strlcpy(reference_msg_from, tmp_val, sizeof(reference_msg_from));
                             parser_tx_obj.filter_msg_from_valid_idx = current_item_idx;
                         }
 
@@ -368,7 +371,7 @@ parser_error_t tx_display_query(uint16_t displayIdx,
     uint8_t num_items;
     CHECK_PARSER_ERR(tx_display_numItems(&num_items));
 
-    if (displayIdx < 0 || displayIdx >= num_items) {
+    if (displayIdx >= num_items) {
         return parser_display_idx_out_of_range;
     }
 

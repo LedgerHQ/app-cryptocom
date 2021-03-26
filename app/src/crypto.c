@@ -82,7 +82,7 @@ uint16_t crypto_sign(uint8_t *signature,
 
     cx_ecfp_private_key_t cx_privateKey;
     uint8_t privateKeyData[32];
-    int signatureLength;
+    int signatureLength = 0;
     unsigned int info = 0;
 
     BEGIN_TRY
@@ -165,7 +165,7 @@ void ripemd160_32(uint8_t *out, uint8_t *in) {
 void crypto_set_hrp(char *p) {
     bech32_hrp_len = strlen(p);
     if (bech32_hrp_len < MAX_BECH32_HRP_LEN) {
-        strcpy(bech32_hrp, p);
+        strlcpy(bech32_hrp, p, MAX_BECH32_HRP_LEN + 1);
     }
 }
 

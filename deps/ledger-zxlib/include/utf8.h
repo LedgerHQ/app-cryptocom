@@ -1141,7 +1141,6 @@ utf8_int32_t utf8lwrcodepoint(utf8_int32_t cp) {
             case 0x0198: cp = 0x0199; break;
             case 0x01a7: cp = 0x01a8; break;
             case 0x01ac: cp = 0x01ad; break;
-            case 0x01af: cp = 0x01b0; break;
             case 0x01b8: cp = 0x01b9; break;
             case 0x01bc: cp = 0x01bd; break;
             case 0x01f4: cp = 0x01f5; break;
@@ -1217,7 +1216,6 @@ utf8_int32_t utf8uprcodepoint(utf8_int32_t cp) {
             case 0x0199: cp = 0x0198; break;
             case 0x01a8: cp = 0x01a7; break;
             case 0x01ad: cp = 0x01ac; break;
-            case 0x01b0: cp = 0x01af; break;
             case 0x01b9: cp = 0x01b8; break;
             case 0x01bd: cp = 0x01bc; break;
             case 0x01f5: cp = 0x01f4; break;

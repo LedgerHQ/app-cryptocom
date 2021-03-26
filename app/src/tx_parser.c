@@ -129,13 +129,13 @@ __Z_INLINE void append_key_item(int16_t token_index) {
 ///////////////////////////
 
 parser_error_t tx_traverse_find(int16_t root_token_index, uint16_t *ret_value_token_index) {
-    const jsmntype_t token_type = parser_tx_obj.json.tokens[root_token_index].type;
-
     CHECK_APP_CANARY()
 
     if (parser_tx_obj.tx == NULL || root_token_index < 0) {
         return parser_no_data;
     }
+
+    const jsmntype_t token_type = parser_tx_obj.json.tokens[root_token_index].type;
 
     if (parser_tx_obj.query.max_level <= 0 || parser_tx_obj.query.max_depth <= 0 ||
         token_type == JSMN_STRING ||

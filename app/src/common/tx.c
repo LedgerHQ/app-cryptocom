@@ -115,7 +115,7 @@ tx_error_t tx_getItem(uint8_t displayIdx,
         return err;
     }
 
-    if (displayIdx < 0 || displayIdx > numItems) {
+    if (displayIdx > numItems) {
         return tx_no_data;
     }
 
