@@ -25,6 +25,10 @@ MY_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 include $(BOLOS_SDK)/Makefile.defines
 
+# Patch SDK
+COMMON_LOAD_PARAMS=--tlv --targetId $(TARGET_ID) --targetVersion="$(TARGET_VERSION)" --delete --fileName bin/app.hex --appName \"$(APPNAME)\" --appVersion $(APPVERSION) --dataSize $$((0x`cat debug/app.map |grep _envram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'` - 0x`cat debug/app.map |grep _nvram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'`)) `ICONHEX=\`python3 $(BOLOS_SDK)/icon3.py --hexbitmaponly $(ICONNAME)  2>/dev/null\` ; [ ! -z "$$ICONHEX" ] && echo "--icon $$ICONHEX"` $(PARAM_SCP)
+COMMON_DELETE_PARAMS=--targetId $(TARGET_ID) --appName \"$(APPNAME)\" $(PARAM_SCP)
+
 # Main app configuration
 APPNAME = "Crypto.org Chain"
 APPVERSION_M=2
