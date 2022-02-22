@@ -1,0 +1,65 @@
+name: Compilation & tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  job_nanoS_build_debug:
+    name: Build debug app for NanoS
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          make DEBUG=1
+      - name: Upload app binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-nanoS
+          path: app/bin
+
+  job_nanoX_build_debug:
+    name: Build debug app for NanoX
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          make DEBUG=1 BOLOS_SDK=$NANOX_SDK
+      - name: Upload app binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-nanoX
+          path: app/bin
+
+  job_functional_test:
+    name: Functional tests
+    needs:
+      - job_nanoS_build_debug
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+      - name: Download app binary
+        uses: actions/download-artifact@v2
+        with:
+          name: app-nanoS
+          path: app/bin
+      - name: Install dependencies
+        run: |
+          make zemu_install
+      - name: Run test
+        run: |
+          make zemu_test
