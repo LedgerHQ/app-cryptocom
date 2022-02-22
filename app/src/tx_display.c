@@ -87,7 +87,7 @@ __Z_INLINE parser_error_t calculate_is_default_chainid() {
 
     // get chain_id
     char outKey[2];
-    char outVal[20];
+    char outVal[27];
     uint8_t pageCount;
     INIT_QUERY_CONTEXT(outKey, sizeof(outKey),
                        outVal, sizeof(outVal),
