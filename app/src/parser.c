@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <zxmacros.h>
+#include <zxformat.h>
 #include <tx_validate.h>
 #include <zxtypes.h>
 #include "tx_parser.h"
@@ -215,11 +216,18 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
         return parser_display_idx_out_of_range;
     }
 
+    // Use a tmpKey string variable of length long enough to store any
+    // parser output. This trick is useful for NanoS where zxlib defines
+    // a string of length 17 for keys and it is too short to fit
+    // all possible parser outputs. The consequence is that tx_display_make_friendly
+    // then cannot find a match to make the string friendlier.
+    char tmpKey[50] = {0};
+
     uint16_t ret_value_token_index = 0;
-    CHECK_PARSER_ERR(tx_display_query(displayIdx, outKey, outKeyLen, &ret_value_token_index));
+    CHECK_PARSER_ERR(tx_display_query(displayIdx, tmpKey, sizeof(tmpKey), &ret_value_token_index));
     CHECK_APP_CANARY()
 
-    if (parser_isAmount(outKey)) {
+    if (parser_isAmount(tmpKey)) {
         CHECK_PARSER_ERR(parser_formatAmount(
                 ret_value_token_index,
                 outVal, outValLen,
@@ -232,15 +240,11 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
     }
     CHECK_APP_CANARY()
 
+    parser_tx_obj.query.out_key = tmpKey;
     CHECK_PARSER_ERR(tx_display_make_friendly())
-    CHECK_APP_CANARY()
+    strlcpy(outKey,tmpKey,outKeyLen);
 
-    if (*pageCount > 1) {
-        size_t keyLen = strlen(outKey);
-        if (keyLen < outKeyLen) {
-            snprintf(outKey + keyLen, outKeyLen - keyLen, " [%d/%d]", pageIdx + 1, *pageCount);
-        }
-    }
+    parser_tx_obj.query.out_key = outKey;
 
     CHECK_APP_CANARY()
     return parser_ok;

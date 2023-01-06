@@ -46,14 +46,20 @@ __Z_INLINE uint8_t app_fill_address(address_kind_e kind) {
     return action_addr_len;
 }
 
-__Z_INLINE void app_reply_address(address_kind_e kind) {
-    (void) kind;
-
+__Z_INLINE void app_reply_address(void) {
     set_code(G_io_apdu_buffer, action_addr_len, APDU_CODE_OK);
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, action_addr_len + 2);
 }
 
 __Z_INLINE void app_reply_error() {
     set_code(G_io_apdu_buffer, 0, APDU_CODE_DATA_INVALID);
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
+}
+
+__Z_INLINE void app_reject() {
+#ifdef SUPPORT_SR25519
+    zeroize_sr25519_signdata();
+#endif
+    set_code(G_io_apdu_buffer, 0, APDU_CODE_COMMAND_NOT_ALLOWED);
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
 }

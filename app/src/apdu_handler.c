@@ -25,10 +25,12 @@
 #include "view.h"
 #include "actions.h"
 #include "tx.h"
+#include "addr.h"
 #include "crypto.h"
 #include "coin.h"
 #include "zxmacros.h"
 #include "parser_impl.h"
+#include "view_internal.h"
 
 __Z_INLINE void handleGetAddrSecp256K1(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
     uint8_t len = extractHRP(rx, OFFSET_DATA);
@@ -38,7 +40,8 @@ __Z_INLINE void handleGetAddrSecp256K1(volatile uint32_t *flags, volatile uint32
 
     if (requireConfirmation) {
         app_fill_address(addr_secp256k1);
-        view_address_show(addr_secp256k1);
+        view_review_init(addr_getItem, addr_getNumItems, app_reply_address);
+        view_review_show(REVIEW_ADDRESS);
         *flags |= IO_ASYNCH_REPLY;
         return;
     }
@@ -65,7 +68,8 @@ __Z_INLINE void handleSignSecp256K1(volatile uint32_t *flags, volatile uint32_t 
         THROW(APDU_CODE_DATA_INVALID);
     }
 
-    view_sign_show();
+    view_review_init(tx_getItem, tx_getNumItems, app_sign);
+    view_review_show(REVIEW_TXN);
     *flags |= IO_ASYNCH_REPLY;
 }
 
