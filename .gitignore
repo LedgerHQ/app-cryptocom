@@ -2,8 +2,7 @@
 app/build/
 app/bin/
 app/debug/
-app/output/app*
-app/pkg/*.sh
+app/pkg/
 
 # Temporary or auto-generated tests 
 # related files.
