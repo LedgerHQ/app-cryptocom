@@ -3,10 +3,10 @@ import { resolve } from "path";
 
 export const APP_SEED = "equip will roof matter pink blind book anxiety banner elbow sun young";
 
-const APP_PATH_S = resolve("../app/output/app_s.elf");
-const APP_PATH_X = resolve("../app/output/app_x.elf");
-const APP_PATH_SP = resolve("../app/output/app_s2.elf");
-const APP_PATH_ST = resolve("../app/output/app_stax.elf");
+const APP_PATH_S = resolve("../app/build/nanos/bin/app.elf");
+const APP_PATH_X = resolve("../app/build/nanox/bin/app.elf");
+const APP_PATH_SP = resolve("../app/build/nanos2/bin/app.elf");
+const APP_PATH_ST = resolve("../app/build/stax/bin/app.elf");
 
 export const models: IDeviceModel[] = [
     { name: "nanos", prefix: "S", path: APP_PATH_S },
