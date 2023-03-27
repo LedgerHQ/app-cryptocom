@@ -8,7 +8,6 @@ app/pkg/*.sh
 # Temporary or auto-generated tests 
 # related files.
 tests_zemu/snapshots-tmp/
-tests_zemu/package-lock.json
 tests_zemu/node_modules/
 tests_zemu/yarn-error.log
 
