@@ -22,6 +22,11 @@ let defaultOptions = {
 
 jest.setTimeout(30000);
 
+beforeAll(async () => {
+    await Zemu.checkAndPullImage();
+});
+  
+
 describe("Basic checks", function () {
     test.concurrent.each(models)("can start and stop container ($name)", async function ({ name, path }) {
         const sim = new Zemu(path);
