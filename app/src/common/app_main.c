@@ -35,9 +35,11 @@ unsigned char io_event(unsigned char channel) {
     (void) channel;
 
     switch (G_io_seproxyhal_spi_buffer[0]) {
+#ifdef HAVE_NBGL
         case SEPROXYHAL_TAG_FINGER_EVENT: //
             UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
             break;
+#endif  // HAVE_NBGL
 
         case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT: // for Nano S
 #ifdef HAVE_BAGL
@@ -51,6 +53,9 @@ unsigned char io_event(unsigned char channel) {
                 UX_DISPLAYED_EVENT();
             }
 #endif
+#ifdef HAVE_NBGL
+            UX_DEFAULT_EVENT();
+#endif  // HAVE_NBGL
             break;
 
         case SEPROXYHAL_TAG_TICKER_EVENT: { //
