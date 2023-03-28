@@ -389,6 +389,7 @@ parser_error_t tx_display_query(uint16_t displayIdx,
     strncpy_s(outKey, get_required_root_item(root_index), outKeyLen);
 
     if (!display_cache.root_item_start_token_valid[root_index]) {
+        parser_tx_obj.query.out_val = NULL;
         return parser_no_data;
     }
 
