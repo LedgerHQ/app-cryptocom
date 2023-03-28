@@ -23,10 +23,12 @@ $(error BOLOS_SDK is not set)
 endif
 
 include $(BOLOS_SDK)/Makefile.defines
-include $(CURDIR)/Makefile.version
 
 # Main app configuration
 APPNAME = "Crypto.org Chain"
+APPVERSION_M=2
+APPVERSION_N=17
+APPVERSION_P=0
 
 APPPATH = "44'/394'"
 ifeq ($(TARGET_NAME),TARGET_NANOX)
