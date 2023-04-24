@@ -237,6 +237,7 @@ parser_error_t tx_indexRootFields() {
 
                         parser_tx_obj.filter_msg_from_count++;
                     }
+                    break;
                 }
                 default:
                     break;
@@ -314,6 +315,7 @@ __Z_INLINE uint8_t get_subitem_count(root_item_e root_item) {
             if (!tx_is_expert_mode()) {
                 tmp_num_items -= 1;     // Hide Gas field
             }
+            break;
         default:
             break;
     }
