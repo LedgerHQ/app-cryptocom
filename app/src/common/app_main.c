@@ -35,18 +35,27 @@ unsigned char io_event(unsigned char channel) {
     (void) channel;
 
     switch (G_io_seproxyhal_spi_buffer[0]) {
+#ifdef HAVE_NBGL
         case SEPROXYHAL_TAG_FINGER_EVENT: //
             UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
             break;
+#endif  // HAVE_NBGL
 
         case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT: // for Nano S
+#ifdef HAVE_BAGL
             UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
+#endif
             break;
 
         case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
+#ifdef HAVE_BAGL
             if (!UX_DISPLAYED()) {
                 UX_DISPLAYED_EVENT();
             }
+#endif
+#ifdef HAVE_NBGL
+            UX_DEFAULT_EVENT();
+#endif  // HAVE_NBGL
             break;
 
         case SEPROXYHAL_TAG_TICKER_EVENT: { //
@@ -194,10 +203,10 @@ void app_init() {
 
     app_mode_reset();
     if (app_mode_expert()) {
-        view_idle_show(1);
+        view_idle_show(1,NULL);
     }
 
-    view_idle_show(0);
+    view_idle_show(0,NULL);
 
 #ifdef HAVE_BLE
     // Enable Bluetooth
