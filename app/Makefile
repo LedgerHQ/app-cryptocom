@@ -41,11 +41,11 @@ APP_LOAD_PARAMS += --delete $(COMMON_LOAD_PARAMS) --path $(APPPATH) --curve secp
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 APP_STACK_SIZE:=1212
-ICONNAME:=$(CURDIR)/nanos_icon.gif
+ICONNAME:=$(CURDIR)/icons/nanos_icon.gif
 else ifeq ($(TARGET_NAME),TARGET_STAX)
-ICONNAME:=$(CURDIR)/stax_icon.gif
+ICONNAME:=$(CURDIR)/icons/stax_icon.gif
 else
-ICONNAME:=$(CURDIR)/nanox_icon.gif
+ICONNAME:=$(CURDIR)/icons/nanox_icon.gif
 endif
 
 
