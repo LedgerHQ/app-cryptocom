@@ -57,7 +57,9 @@ __Z_INLINE void handle_getversion(volatile uint32_t *flags, volatile uint32_t *t
     G_io_apdu_buffer[1] = LEDGER_MAJOR_VERSION;
     G_io_apdu_buffer[2] = LEDGER_MINOR_VERSION;
     G_io_apdu_buffer[3] = LEDGER_PATCH_VERSION;
-    G_io_apdu_buffer[4] = !IS_UX_ALLOWED;
+    // SDK won't let the app reply an apdu message if screensaver is active
+    // Always indicate that the device is unlocked.
+    G_io_apdu_buffer[4] = false;
 
     G_io_apdu_buffer[5] = (TARGET_ID >> 24) & 0xFF;
     G_io_apdu_buffer[6] = (TARGET_ID >> 16) & 0xFF;
