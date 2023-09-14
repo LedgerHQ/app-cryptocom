@@ -18,7 +18,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@zondax/zemu": "^0.42.0",
+    "@zondax/zemu": "^0.44.0",
     "ledger-cosmos-js": "^2",
     "ts-jest": "^29.0.3"
   },
