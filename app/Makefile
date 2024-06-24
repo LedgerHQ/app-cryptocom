@@ -25,10 +25,10 @@ endif
 include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
-APPNAME = "Crypto.org Chain"
+APPNAME = "Cronos POS Chain"
 APPVERSION_M=2
 APPVERSION_N=17
-APPVERSION_P=2
+APPVERSION_P=3
 
 APPPATH = "44'/394'"
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
@@ -74,8 +74,6 @@ all: default
 DEFINES 	  += REVIEW_SCREEN_ENABLED # zxlib : enable nanos "please review" screen. 
 
 DEFINES       += UNUSED\(x\)=\(void\)x
-
-DEFINES       += APPNAME=\"$(APPNAME)\"
 
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 DEFINES       += APPVERSION=\"$(APPVERSION)\"
