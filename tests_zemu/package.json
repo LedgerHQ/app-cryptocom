@@ -18,13 +18,13 @@
     "test": "jest"
   },
   "dependencies": {
-    "@zondax/zemu": "^0.45.0",
+    "@zondax/zemu": "^0.49.0",
     "ledger-cosmos-js": "^2",
     "ts-jest": "^29.0.3"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
-    "@types/ledgerhq__hw-transport": "^4.21.4",
+    "@types/ledgerhq__hw-transport": "^4.21.8",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "@typescript-eslint/parser": "^5.52.0",
     "blakejs": "^1.1.1",
