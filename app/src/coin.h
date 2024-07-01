@@ -42,8 +42,14 @@ typedef enum {
 #define VIEW_ADDRESS_OFFSET_SECP256K1       PK_LEN_SECP256K1
 #define VIEW_ADDRESS_LAST_PAGE_DEFAULT      0
 
-#define MENU_MAIN_APP_LINE1                "Crypto.org"
+#if defined(TARGET_NANOS)
+#define MENU_MAIN_APP_LINE1                "Cronos POS"
+#define MENU_MAIN_APP_LINE2                "Chain ready"
+#else
+#define MENU_MAIN_APP_LINE1                APPNAME
 #define MENU_MAIN_APP_LINE2                "ready"
+#endif
+
 #define APPVERSION_LINE1                   "Version:"
 #define APPVERSION_LINE2                   ("v" APPVERSION)
 
