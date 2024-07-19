@@ -1,5 +1,6 @@
 #*******************************************************************************
 #   Ledger App
+#   (c) 2023 Ledger
 #   (c) 2021 CRO Protocol Labs ("Crypto.org")
 #   (c) 2018-2020 Zondax GmbH
 #   (c) 2017 Ledger
@@ -21,102 +22,116 @@ ifeq ($(BOLOS_SDK),)
 $(error BOLOS_SDK is not set)
 endif
 
-MY_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-
 include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
-APPNAME = "Crypto.org Chain"
+APPNAME = "Cronos POS Chain"
 APPVERSION_M=2
-APPVERSION_N=16
-APPVERSION_P=7
+APPVERSION_N=17
+APPVERSION_P=4
 
 APPPATH = "44'/394'"
-ifeq ($(TARGET_NAME),TARGET_NANOX)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
 APP_LOAD_PARAMS = --appFlags 0x200
 else
 APP_LOAD_PARAMS = --appFlags 0x000
 endif
-APP_LOAD_PARAMS += --delete $(COMMON_LOAD_PARAMS) --path $(APPPATH)
+APP_LOAD_PARAMS += --delete $(COMMON_LOAD_PARAMS) --path $(APPPATH) --curve secp256k1
+
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 APP_STACK_SIZE:=1212
-ICONNAME:=$(CURDIR)/nanos_icon.gif
+ICONNAME:=$(CURDIR)/icons/nanos_icon.gif
+else ifeq ($(TARGET_NAME),TARGET_STAX)
+ICONNAME:=$(CURDIR)/icons/stax_icon.gif
 else
-ICONNAME:=$(CURDIR)/nanox_icon.gif
+ICONNAME:=$(CURDIR)/icons/nanox_icon.gif
 endif
+
 
 ifndef ICONNAME
 $(error ICONNAME is not set)
 endif
 
+DEVICE_NAME := $(shell echo $(TARGET_NAME) | cut -d'_' -f2 | tr '[:upper:]' '[:lower:]')
 all: default
-	@echo "#!/usr/bin/env bash" > $(CURDIR)/pkg/zxtool.sh
-	@echo "APPNAME=\""${APPNAME}"\"" >> $(CURDIR)/pkg/zxtool.sh
-	@echo "APPVERSION=\"${APPVERSION}\"" >> $(CURDIR)/pkg/zxtool.sh
-	@echo "APPPATH=\""${APPPATH}"\"" >> $(CURDIR)/pkg/zxtool.sh
-	@echo "LOAD_PARAMS='${COMMON_LOAD_PARAMS}'" >> $(CURDIR)/pkg/zxtool.sh
-	@echo "DELETE_PARAMS='${COMMON_DELETE_PARAMS}'" >> $(CURDIR)/pkg/zxtool.sh
-	@echo "APPHEX=\"" >> $(CURDIR)/pkg/zxtool.sh
-	@cat $(CURDIR)/bin/app.hex >> $(CURDIR)/pkg/zxtool.sh
-	@echo "\"" >> $(CURDIR)/pkg/zxtool.sh
-	@cat $(CURDIR)/../deps/ledger-zxlib/scripts/template.sh >> $(CURDIR)/pkg/zxtool.sh
-	@chmod +x $(CURDIR)/pkg/zxtool.sh
+	@mkdir -p $(CURDIR)/pkg
+	@echo "#!/usr/bin/env bash" > $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@echo "APPNAME=\""${APPNAME}"\"" >> $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@echo "APPVERSION=\"${APPVERSION}\"" >> $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@echo "APPPATH=\""${APPPATH}"\"" >> $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@echo "LOAD_PARAMS=($$(echo "${APP_LOAD_PARAMS}" | sed -e "s|"${APPNAME}"|\""${APPNAME}"\"|"))" >> $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@echo "DELETE_PARAMS=($$(echo "${COMMON_DELETE_PARAMS}" | sed -e "s|"${APPNAME}"|\""${APPNAME}"\"|"))" >> $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@echo "APPHEX=\"" >> $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@cat $(CURDIR)/bin/app.hex >> $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@echo "\"" >> $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@cat $(CURDIR)/../deps/ledger-zxlib/scripts/template.sh >> $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
+	@chmod +x $(CURDIR)/pkg/${DEVICE_NAME}_installer.sh
 
 ############
 # Platform
 
-DEFINES       += UNUSED\(x\)=\(void\)x
-DEFINES       += PRINTF\(...\)=
+DEFINES 	  += REVIEW_SCREEN_ENABLED # zxlib : enable nanos "please review" screen. 
 
-DEFINES       += APPNAME=\"$(APPNAME)\"
+DEFINES       += UNUSED\(x\)=\(void\)x
 
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 DEFINES       += APPVERSION=\"$(APPVERSION)\"
 
 DEFINES       += OS_IO_SEPROXYHAL
-DEFINES       += HAVE_BAGL HAVE_SPRINTF
+DEFINES       += HAVE_SPRINTF
 DEFINES       += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
 
 DEFINES       += LEDGER_MAJOR_VERSION=$(APPVERSION_M) LEDGER_MINOR_VERSION=$(APPVERSION_N) LEDGER_PATCH_VERSION=$(APPVERSION_P)
 
 DEFINES       += USB_SEGMENT_SIZE=64
 DEFINES       += HAVE_BOLOS_APP_STACK_CANARY
-DEFINES       += NDEBUG
 
 DEFINES       += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
 
-ifeq ($(TARGET_NAME),TARGET_NANOX)
-DEFINES       += HAVE_BLE
-DEFINES       += HAVE_BLE_APDU BLE_COMMAND_TIMEOUT_MS=2000
-
-SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
+# Bluetooth
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
+DEFINES   += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
 endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
-DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=128
-DEFINES       += COMPLIANCE_UX_160 HAVE_UX_LEGACY HAVE_UX_FLOW
+    DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+else ifeq ($(TARGET_NAME),TARGET_STAX)
+	DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+	DEFINES       += NBGL_QRCODE
+	SDK_SOURCE_PATH += qrcode
 else
-# Assume Nano X/S+
-DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=300
-
-DEFINES       += HAVE_GLO096
-DEFINES       += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
-DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
-
-DEFINES       += HAVE_UX_FLOW
+    DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+    DEFINES       += HAVE_GLO096
+    DEFINES       += BAGL_WIDTH=128 BAGL_HEIGHT=64
+    DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
+    DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
+    DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
+    DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+	DEFINES       += HAVE_UX_FLOW
 endif
 
-# X specific
+# Both nano S and X benefit from the flow.
+ifneq ($(TARGET_NAME),TARGET_STAX)
+	DEFINES   += HAVE_BAGL
+endif
+
+# Enabling debug PRINTF
+DEBUG = 0
+ifneq ($(DEBUG),0)
+        ifeq ($(TARGET_NAME),TARGET_NANOS)
+                DEFINES   += DEVEL HAVE_PRINTF PRINTF=screen_printf
+        else
+                DEFINES   += DEVEL HAVE_PRINTF PRINTF=mcu_usb_printf
+        endif
+else
+        DEFINES   += PRINTF\(...\)=
+endif
 
 #Feature temporarily disabled
 DEFINES   += LEDGER_SPECIFIC
 
 # Compiler, assembler, and linker
-
 ifneq ($(BOLOS_ENV),)
 $(info BOLOS_ENV is $(BOLOS_ENV))
 CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
@@ -135,35 +150,37 @@ endif
 
 #########################
 
-CC := $(CLANGPATH)clang
-#CFLAGS += -Werror
-CFLAGS += -O3 -Os -Wpedantic -Wall -Wno-unknown-pragmas -Wno-c11-extensions
-# To accept Ledger SDK issues
-CFLAGS += -Wno-missing-declarations -Wno-empty-translation-unit -Wno-language-extension-token
-CFLAGS += -Wno-embedded-directive -Wno-pointer-arith
-CFLAGS += -Wno-typedef-redefinition -Wno-newline-eof
-
-AS := $(GCCPATH)arm-none-eabi-gcc
-AFLAGS +=
-
-LD       := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS  += -O3 -Os
-LDLIBS   += -lm -lgcc -lc
+CFLAGS  += -Wno-unknown-pragmas -Wno-unused-parameter
+CC      := $(CLANGPATH)clang
+AS      := $(GCCPATH)arm-none-eabi-gcc
+LD      := $(GCCPATH)arm-none-eabi-gcc
+LDLIBS  += -lm -lgcc -lc
 
 ##########################
-GLYPH_SRC_DIR = glyphs
-INCLUDES_PATH += $(MY_DIR)/glyphs
 include $(BOLOS_SDK)/Makefile.glyphs
 
-APP_SOURCE_PATH += $(MY_DIR)/src
-APP_SOURCE_PATH += $(MY_DIR)/../deps/ledger-zxlib/include
-APP_SOURCE_PATH += $(MY_DIR)/../deps/ledger-zxlib/src
-APP_SOURCE_PATH += $(MY_DIR)/../deps/ledger-zxlib/app/common
-APP_SOURCE_PATH += $(MY_DIR)/../deps/jsmn/src
+ZXLIB_COMPILE_STAX ?= 1
+
+APP_SOURCE_PATH += $(CURDIR)/src
+APP_SOURCE_PATH += $(CURDIR)/glyphs
+APP_SOURCE_PATH += $(CURDIR)/../deps/sha512
+APP_SOURCE_PATH += $(CURDIR)/../deps/jsmn/src
+
+ZXLIB_DIR := $(CURDIR)/../deps/ledger-zxlib/
+APP_SOURCE_PATH += $(ZXLIB_DIR)/include
+APP_SOURCE_PATH += $(ZXLIB_DIR)/src
+APP_SOURCE_PATH += $(ZXLIB_DIR)/app/common
+APP_SOURCE_PATH += $(ZXLIB_DIR)/app/ui
 
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
-SDK_SOURCE_PATH  += lib_ux
+ifneq ($(TARGET_NAME),TARGET_STAX)
+SDK_SOURCE_PATH += lib_ux
+endif
+
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
+SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
+endif
 
 # Import generic rules from the SDK
 include $(BOLOS_SDK)/Makefile.rules
@@ -171,15 +188,23 @@ include $(BOLOS_SDK)/Makefile.rules
 #add dependency on custom makefile filename
 dep/%.d: %.c Makefile
 
+.PHONY: rust
 rust:
-	# Do nothing
+	@echo "No rust code"
+
+.PHONY: rust_clean
+rust_clean:
+	@echo "No rust code"
 
 # load, delete and listvariants are provided to comply with Ledger requirements
+.PHONY: load
 load:
 	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
 
+.PHONY: delete
 delete:
 	python -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
 
+.PHONY: listvariants
 listvariants:
 	@echo VARIANTS COIN cro_org

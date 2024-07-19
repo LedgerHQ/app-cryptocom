@@ -21,7 +21,8 @@
 #include <string.h>
 #include "zxmacros.h"
 
-#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2) || defined(TARGET_STAX)
 #define RAM_BUFFER_SIZE 8192
 #define FLASH_BUFFER_SIZE 16384
 #elif defined(TARGET_NANOS)
@@ -41,7 +42,7 @@ typedef struct {
 storage_t N_appdata_impl __attribute__ ((aligned(64)));
 #define N_appdata (*(storage_t *)PIC(&N_appdata_impl))
 
-#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2) || defined(TARGET_STAX)
 storage_t const N_appdata_impl __attribute__ ((aligned(64)));
 #define N_appdata (*(volatile storage_t *)PIC(&N_appdata_impl))
 #endif
@@ -52,7 +53,7 @@ void tx_initialize() {
     buffering_init(
         ram_buffer,
         sizeof(ram_buffer),
-        N_appdata.buffer,
+        (uint8_t *) N_appdata.buffer,
         sizeof(N_appdata.buffer)
     );
 }
@@ -93,46 +94,44 @@ const char *tx_parse() {
     return NULL;
 }
 
-tx_error_t tx_getNumItems(uint8_t *num_items) {
+zxerr_t tx_getNumItems(uint8_t *num_items)
+{
     parser_error_t err = parser_getNumItems(&ctx_parsed_tx, num_items);
-
     if (err != parser_ok) {
-        return tx_no_data;
+        return zxerr_unknown;
     }
-
-    return tx_no_error;
+    return zxerr_ok;
 }
 
-tx_error_t tx_getItem(uint8_t displayIdx,
-                      char *outKey, uint16_t outKeyLen,
-                      char *outVal, uint16_t outValLen,
-                      uint8_t pageIdx, uint8_t *pageCount) {
-    tx_error_t err = tx_no_error;
 
+zxerr_t tx_getItem(int8_t displayIdx,
+                   char *outKey, uint16_t outKeyLen,
+                   char *outVal, uint16_t outValLen,
+                   uint8_t pageIdx, uint8_t *pageCount)
+{
     uint8_t numItems = 0;
-    err = tx_getNumItems(&numItems);
-    if (err != tx_no_error) {
-        return err;
-    }
+
+    CHECK_ZXERR(tx_getNumItems(&numItems))
 
     if (displayIdx > numItems) {
-        return tx_no_data;
+        return zxerr_no_data;
     }
 
-    err = (tx_error_t) parser_getItem(&ctx_parsed_tx,
-                                      displayIdx,
-                                      outKey, outKeyLen,
-                                      outVal, outValLen,
-                                      pageIdx, pageCount);
+    parser_error_t err = parser_getItem(&ctx_parsed_tx,
+                                        displayIdx,
+                                        outKey, outKeyLen,
+                                        outVal, outValLen,
+                                        pageIdx, pageCount);
+
 
     // Convert error codes
     if (err == parser_no_data ||
         err == parser_display_idx_out_of_range ||
         err == parser_display_page_out_of_range)
-        return tx_no_data;
+        return zxerr_no_data;
 
-    if (err == parser_ok)
-        return tx_no_error;
+    if (err != parser_ok)
+        return zxerr_unknown;
 
-    return err;
+    return zxerr_ok;
 }

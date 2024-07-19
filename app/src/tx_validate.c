@@ -66,7 +66,7 @@ int8_t contains_whitespace(parsed_json_t *json) {
 int8_t is_sorted(int16_t first_index,
                  int16_t second_index,
                  parsed_json_t *json) {
-#if DEBUG_SORTING
+#if defined(DEBUG_SORTING)
     char first[256];
     char second[256];
 

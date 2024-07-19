@@ -237,6 +237,7 @@ parser_error_t tx_indexRootFields() {
 
                         parser_tx_obj.filter_msg_from_count++;
                     }
+                    break;
                 }
                 default:
                     break;
@@ -314,6 +315,7 @@ __Z_INLINE uint8_t get_subitem_count(root_item_e root_item) {
             if (!tx_is_expert_mode()) {
                 tmp_num_items -= 1;     // Hide Gas field
             }
+            break;
         default:
             break;
     }
@@ -389,6 +391,7 @@ parser_error_t tx_display_query(uint16_t displayIdx,
     strncpy_s(outKey, get_required_root_item(root_index), outKeyLen);
 
     if (!display_cache.root_item_start_token_valid[root_index]) {
+        parser_tx_obj.query.out_val = NULL;
         return parser_no_data;
     }
 
