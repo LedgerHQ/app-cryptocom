@@ -30,9 +30,9 @@ void app_sign() {
     const uint8_t *message = tx_get_buffer() + CRYPTO_BLOB_SKIP_BYTES;
     const uint16_t messageLength = tx_get_buffer_length() - CRYPTO_BLOB_SKIP_BYTES;
 
-    const uint8_t replyLen = crypto_sign(signature, IO_APDU_BUFFER_SIZE - 3, message, messageLength);
+    const size_t replyLen = crypto_sign(signature, IO_APDU_BUFFER_SIZE - 3, message, messageLength);
     if (replyLen > 0) {
-        set_code(G_io_apdu_buffer, replyLen, APDU_CODE_OK);
+        set_code(G_io_apdu_buffer, (uint8_t) replyLen, APDU_CODE_OK);
         io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, replyLen + 2);
     } else {
         set_code(G_io_apdu_buffer, 0, APDU_CODE_SIGN_VERIFY_ERROR);
