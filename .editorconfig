@@ -7,7 +7,7 @@ trim_trailing_whitespace = true
 end_of_line = lf
 insert_final_newline = true
 
-[*.{c,h,cpp,hpp}]
+[*.{c,h,cpp,hpp,ts}]
 indent_style = space
 indent_size = 4
 
