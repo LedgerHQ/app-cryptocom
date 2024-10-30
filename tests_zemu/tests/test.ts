@@ -1,6 +1,11 @@
 import { jest, describe, expect, it, test } from "@jest/globals";
 import Zemu from "@zondax/zemu";
-import { DEFAULT_START_OPTIONS, TouchNavigation, ClickNavigation, ButtonKind } from "@zondax/zemu";
+import {
+    DEFAULT_START_OPTIONS,
+    TouchNavigation,
+    ClickNavigation,
+    ButtonKind,
+} from "@zondax/zemu";
 import crypto from "crypto";
 import CosmosApp from "ledger-cosmos-js";
 import secp256k1 from "secp256k1/elliptic";
@@ -25,147 +30,178 @@ jest.setTimeout(50000);
 beforeAll(async () => {
     await Zemu.checkAndPullImage();
 });
-  
 
 describe("Basic checks", function () {
-    test.concurrent.each(models)("can start and stop container ($name)", async function ({ name, path }) {
-        const sim = new Zemu(path);
-        try {
-            await sim.start({ ...defaultOptions, model: name });
-        } finally {
-            await sim.close();
+    test.concurrent.each(models)(
+        "can start and stop container ($name)",
+        async function ({ name, path }) {
+            const sim = new Zemu(path);
+            try {
+                await sim.start({ ...defaultOptions, model: name });
+            } finally {
+                await sim.close();
+            }
         }
-    });
+    );
 
-    test.concurrent.each(models)("get app version ($name)", async function ({ name, path }) {
-        const sim = new Zemu(path);
-        try {
-            await sim.start({ ...defaultOptions, model: name });
-            const app = new CosmosApp(sim.getTransport());
-            const resp = await app.getVersion();
+    test.concurrent.each(models)(
+        "get app version ($name)",
+        async function ({ name, path }) {
+            const sim = new Zemu(path);
+            try {
+                await sim.start({ ...defaultOptions, model: name });
+                const app = new CosmosApp(sim.getTransport());
+                const resp = await app.getVersion();
 
-            console.log(resp);
+                console.log(resp);
 
-            expect(resp.return_code).toEqual(0x9000);
-            expect(resp.error_message).toEqual("No errors");
-            expect(resp).toHaveProperty("test_mode");
-            expect(resp).toHaveProperty("major");
-            expect(resp).toHaveProperty("minor");
-            expect(resp).toHaveProperty("patch");
-        } finally {
-            await sim.close();
+                expect(resp.return_code).toEqual(0x9000);
+                expect(resp.error_message).toEqual("No errors");
+                expect(resp).toHaveProperty("test_mode");
+                expect(resp).toHaveProperty("major");
+                expect(resp).toHaveProperty("minor");
+                expect(resp).toHaveProperty("patch");
+            } finally {
+                await sim.close();
+            }
         }
-    });
+    );
 
-    test.concurrent.each(models)("get app info ($name)", async function ({ name, path }) {
-        const sim = new Zemu(path);
-        try {
-            await sim.start({ ...defaultOptions, model: name });
-            const app = new CosmosApp(sim.getTransport());
-            const info = await app.appInfo();
+    test.concurrent.each(models)(
+        "get app info ($name)",
+        async function ({ name, path }) {
+            const sim = new Zemu(path);
+            try {
+                await sim.start({ ...defaultOptions, model: name });
+                const app = new CosmosApp(sim.getTransport());
+                const info = await app.appInfo();
 
-            console.log(info);
-        } finally {
-            await sim.close();
+                console.log(info);
+            } finally {
+                await sim.close();
+            }
         }
-    });
+    );
 
-    test.concurrent.each(models)("get address ($name)", async function ({ name, path }) {
-        const sim = new Zemu(path);
-        try {
-            await sim.start({ ...defaultOptions, model: name });
-            const app = new CosmosApp(sim.getTransport());
-            // Derivation path. First 3 items are automatically hardened!
-            const path = [44, 394, 5, 0, 3];
-            const resp = await app.getAddressAndPubKey(path, "cro");
+    test.concurrent.each(models)(
+        "get address ($name)",
+        async function ({ name, path }) {
+            const sim = new Zemu(path);
+            try {
+                await sim.start({ ...defaultOptions, model: name });
+                const app = new CosmosApp(sim.getTransport());
+                // Derivation path. First 3 items are automatically hardened!
+                const path = [44, 394, 5, 0, 3];
+                const resp = await app.getAddressAndPubKey(path, "cro");
 
-            console.log(resp);
+                console.log(resp);
 
-            expect(resp.return_code).toEqual(0x9000);
-            expect(resp.error_message).toEqual("No errors");
+                expect(resp.return_code).toEqual(0x9000);
+                expect(resp.error_message).toEqual("No errors");
 
-            expect(resp).toHaveProperty("bech32_address");
-            expect(resp).toHaveProperty("compressed_pk");
+                expect(resp).toHaveProperty("bech32_address");
+                expect(resp).toHaveProperty("compressed_pk");
 
-            expect(resp.bech32_address).toEqual("cro12w3875w2a3qqqpheslfznf4e270jm005j098sg");
-            expect(resp.compressed_pk.length).toEqual(33);
-        } finally {
-            await sim.close();
+                expect(resp.bech32_address).toEqual(
+                    "cro12w3875w2a3qqqpheslfznf4e270jm005j098sg"
+                );
+                expect(resp.compressed_pk.length).toEqual(33);
+            } finally {
+                await sim.close();
+            }
         }
-    });
+    );
 
-    test.concurrent.each(models)("show address ($name)", async function ({ name, path, prefix }) {
-        const sim = new Zemu(path);
-        try {
-            await sim.start({
-                ...defaultOptions,
-                model: name,
-                approveAction: ButtonKind.ApproveTapButton,
-                approveKeyword: name === "stax" ? "Show" : "APPROVE",
-            });
-            const app = new CosmosApp(sim.getTransport());
+    test.concurrent.each(models)(
+        "show address ($name)",
+        async function ({ name, path, prefix }) {
+            const sim = new Zemu(path);
+            try {
+                await sim.start({
+                    ...defaultOptions,
+                    model: name,
+                    approveAction: ButtonKind.ApproveTapButton,
+                    approveKeyword:
+                        name === "stax" || name === "flex"
+                            ? "Confirm"
+                            : "APPROVE",
+                });
+                const app = new CosmosApp(sim.getTransport());
 
-            const path = [44, 394, 5, 0, 3];
-            const respRequest = app.showAddressAndPubKey(path, "cro");
+                const path = [44, 394, 5, 0, 3];
+                const respRequest = app.showAddressAndPubKey(path, "cro");
 
-            // Wait until we are not in the main menu
-            await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-            await sim.compareSnapshotsAndApprove(".", `${prefix.toLowerCase()}-show_address`);
+                // Wait until we are not in the main menu
+                await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+                await sim.compareSnapshotsAndApprove(
+                    ".",
+                    `${prefix.toLowerCase()}-show_address`
+                );
 
-            // const resp = await respRequest;
-            // console.log(resp);
+                // const resp = await respRequest;
+                // console.log(resp);
 
-            // expect(resp.return_code).toEqual(0x9000);
-            // expect(resp.error_message).toEqual("No errors");
-            // expect(resp).toHaveProperty("bech32_address");
-            // expect(resp).toHaveProperty("compressed_pk");
-            // expect(resp.bech32_address).toEqual("cro12w3875w2a3qqqpheslfznf4e270jm005j098sg");
-            // expect(resp.compressed_pk.length).toEqual(33);
-        } finally {
-            await sim.close();
+                // expect(resp.return_code).toEqual(0x9000);
+                // expect(resp.error_message).toEqual("No errors");
+                // expect(resp).toHaveProperty("bech32_address");
+                // expect(resp).toHaveProperty("compressed_pk");
+                // expect(resp.bech32_address).toEqual("cro12w3875w2a3qqqpheslfznf4e270jm005j098sg");
+                // expect(resp.compressed_pk.length).toEqual(33);
+            } finally {
+                await sim.close();
+            }
         }
-    });
+    );
 
-    test.concurrent.each(models)("show address - reject ($name)", async function ({ name, path, prefix }) {
-        const sim = new Zemu(path);
-        try {
-            await sim.start({ ...defaultOptions, model: name });
-            const app = new CosmosApp(sim.getTransport());
+    test.concurrent.each(models)(
+        "show address - reject ($name)",
+        async function ({ name, path, prefix }) {
+            const sim = new Zemu(path);
+            try {
+                await sim.start({ ...defaultOptions, model: name });
+                const app = new CosmosApp(sim.getTransport());
 
-            const path = [44, 394, 5, 0, 3];
-            const respRequest = app.showAddressAndPubKey(path, "cro");
+                const path = [44, 394, 5, 0, 3];
+                const respRequest = app.showAddressAndPubKey(path, "cro");
 
-            // Wait until we are not in the main menu
-            await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-            await sim.compareSnapshotsAndReject(".", `${prefix.toLowerCase()}-show_address_reject`);
+                // Wait until we are not in the main menu
+                await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+                await sim.compareSnapshotsAndReject(
+                    ".",
+                    `${prefix.toLowerCase()}-show_address_reject`
+                );
 
-            const resp = await respRequest;
-            console.log(resp);
+                const resp = await respRequest;
+                console.log(resp);
 
-            expect(resp.return_code).toEqual(0x6986);
-            expect(resp.error_message).toEqual("Transaction rejected");
-        } finally {
-            await sim.close();
+                expect(resp.return_code).toEqual(0x6986);
+                expect(resp.error_message).toEqual("Transaction rejected");
+            } finally {
+                await sim.close();
+            }
         }
-    });
+    );
 
-    test.concurrent.each(models)("show address - HUGE ($name)", async function ({ name, path }) {
-        const sim = new Zemu(path);
-        try {
-            await sim.start({ ...defaultOptions, model: name });
-            const app = new CosmosApp(sim.getTransport());
+    test.concurrent.each(models)(
+        "show address - HUGE ($name)",
+        async function ({ name, path }) {
+            const sim = new Zemu(path);
+            try {
+                await sim.start({ ...defaultOptions, model: name });
+                const app = new CosmosApp(sim.getTransport());
 
-            // Derivation path. First 3 items are automatically hardened!
-            const path = [44, 394, 2147483647, 0, 4294967295];
-            const resp = await app.showAddressAndPubKey(path, "cro");
-            console.log(resp);
+                // Derivation path. First 3 items are automatically hardened!
+                const path = [44, 394, 2147483647, 0, 4294967295];
+                const resp = await app.showAddressAndPubKey(path, "cro");
+                console.log(resp);
 
-            expect(resp.return_code).toEqual(0x6985);
-            expect(resp.error_message).toEqual("Conditions not satisfied");
-        } finally {
-            await sim.close();
+                expect(resp.return_code).toEqual(0x6985);
+                expect(resp.error_message).toEqual("Conditions not satisfied");
+            } finally {
+                await sim.close();
+            }
         }
-    });
+    );
 
     test.concurrent.each(models)(
         "show address - HUGE - expert ($name)",
@@ -176,35 +212,40 @@ describe("Basic checks", function () {
                     ...defaultOptions,
                     model: name,
                     approveAction: ButtonKind.ApproveTapButton,
-                    approveKeyword: name === "stax" ? "Path" : "APPROVE",
+                    approveKeyword:
+                        name === "stax" || name === "flex"
+                            ? "Confirm"
+                            : "APPROVE",
                 });
 
                 const app = new CosmosApp(sim.getTransport());
 
                 // Activate expert mode
-                let toggleExpertActions : TouchNavigation | ClickNavigation; 
-                if (name === "stax")
-                {
-                    toggleExpertActions = new TouchNavigation([
+                let toggleExpertActions: TouchNavigation | ClickNavigation;
+                if (name === "stax" || name === "flex") {
+                    toggleExpertActions = new TouchNavigation(name, [
                         ButtonKind.InfoButton,
-                        ButtonKind.NavRightButton,
                         ButtonKind.ToggleSettingButton1,
-                      ]);
-                }
-                else
-                {
+                    ]);
+                } else {
                     toggleExpertActions = new ClickNavigation([1, 0, -1]);
                 }
 
-                const snap_num = await sim.navigate(".",
-                                    `${prefix.toLowerCase()}-show_address_huge_expert`,
-                                    toggleExpertActions.schedule,
-                                    true,
-                                    true,
-                                    0);
+                const snap_num = await sim.navigate(
+                    ".",
+                    `${prefix.toLowerCase()}-show_address_huge_expert`,
+                    toggleExpertActions.schedule,
+                    true,
+                    true,
+                    0
+                );
 
                 expect(
-                    sim.compareSnapshots(".", `${prefix.toLowerCase()}-show_address_huge_expert`, snap_num)
+                    sim.compareSnapshots(
+                        ".",
+                        `${prefix.toLowerCase()}-show_address_huge_expert`,
+                        snap_num
+                    )
                 ).toEqual(true);
 
                 // Derivation path. First 3 items are automatically hardened!
@@ -229,7 +270,9 @@ describe("Basic checks", function () {
                 expect(resp.error_message).toEqual("No errors");
                 expect(resp).toHaveProperty("bech32_address");
                 expect(resp).toHaveProperty("compressed_pk");
-                expect(resp.bech32_address).toEqual("cro1gp7crpcy9quz7wackt56htrgy67yj09wlxut2r");
+                expect(resp.bech32_address).toEqual(
+                    "cro1gp7crpcy9quz7wackt56htrgy67yj09wlxut2r"
+                );
                 expect(resp.compressed_pk.length).toEqual(33);
             } finally {
                 await sim.close();
@@ -244,7 +287,8 @@ describe("Basic checks", function () {
                 ...defaultOptions,
                 model: name,
                 approveAction: ButtonKind.ApproveHoldButton,
-                approveKeyword: name === "stax" ? "hold" : "APPROVE",
+                approveKeyword:
+                    name === "stax" || name === "flex" ? "Hold" : "APPROVE",
             });
             const app = new CosmosApp(sim.getTransport());
 
@@ -264,7 +308,10 @@ describe("Basic checks", function () {
             await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
 
             // Now navigate and approve tx
-            await sim.compareSnapshotsAndApprove(".", `${prefix.toLowerCase()}-${snap_suffix}`);
+            await sim.compareSnapshotsAndApprove(
+                ".",
+                `${prefix.toLowerCase()}-${snap_suffix}`
+            );
 
             let resp = await signatureRequest;
             console.log(resp);
@@ -277,7 +324,9 @@ describe("Basic checks", function () {
             const msgHash = Uint8Array.from(hash.update(tx).digest());
 
             const signatureDER = resp.signature;
-            const signature = secp256k1.signatureImport(Uint8Array.from(signatureDER));
+            const signature = secp256k1.signatureImport(
+                Uint8Array.from(signatureDER)
+            );
 
             const pk = Uint8Array.from(respPk.compressed_pk);
 
@@ -288,17 +337,44 @@ describe("Basic checks", function () {
         }
     }
 
-    test.concurrent.each(models)("sign basic tx ($name)", async function ({ name, path, prefix }) {
-        await navigate_and_sign(example_tx_str_basic, name, path, prefix, "sign_basic");
-    });
+    test.concurrent.each(models)(
+        "sign basic tx ($name)",
+        async function ({ name, path, prefix }) {
+            await navigate_and_sign(
+                example_tx_str_basic,
+                name,
+                path,
+                prefix,
+                "sign_basic"
+            );
+        }
+    );
 
-    test.concurrent.each(models)("sign basic tx - combined ($name)", async function ({ name, path, prefix }) {
-        await navigate_and_sign(example_tx_str_combined, name, path, prefix, "sign_basic_combined");
-    });
+    test.concurrent.each(models)(
+        "sign basic tx - combined ($name)",
+        async function ({ name, path, prefix }) {
+            await navigate_and_sign(
+                example_tx_str_combined,
+                name,
+                path,
+                prefix,
+                "sign_basic_combined"
+            );
+        }
+    );
 
-    test.concurrent.each(models)("sign expert ($name)", async function ({ name, path, prefix }) {
-        await navigate_and_sign(example_tx_str_expert, name, path, prefix, "sign_expert");
-    });
+    test.concurrent.each(models)(
+        "sign expert ($name)",
+        async function ({ name, path, prefix }) {
+            await navigate_and_sign(
+                example_tx_str_expert,
+                name,
+                path,
+                prefix,
+                "sign_expert"
+            );
+        }
+    );
 
     test.concurrent.each(models)(
         "show address and sign basic ($name)",
@@ -309,7 +385,10 @@ describe("Basic checks", function () {
                     ...defaultOptions,
                     model: name,
                     approveAction: ButtonKind.ApproveTapButton,
-                    approveKeyword: name === "stax" ? "Show" : "APPROVE",
+                    approveKeyword:
+                        name === "stax" || name === "flex"
+                            ? "Confirm"
+                            : "APPROVE",
                 });
                 const app = new CosmosApp(sim.getTransport());
 
@@ -323,7 +402,10 @@ describe("Basic checks", function () {
                 await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
 
                 // Now navigate the address / path
-                await sim.compareSnapshotsAndApprove(".", `${prefix.toLowerCase()}-show_address_sign_basic`);
+                await sim.compareSnapshotsAndApprove(
+                    ".",
+                    `${prefix.toLowerCase()}-show_address_sign_basic`
+                );
 
                 const respPk = await respRequest;
                 console.log(respPk);
@@ -337,7 +419,7 @@ describe("Basic checks", function () {
 
                 // Now navigate and approve tx
                 let startImgIdx = 0;
-                if (name === "stax") {
+                if (name === "stax" || name === "flex") {
                     startImgIdx = 3;
                 } else if (name === "nanos") {
                     startImgIdx = 5;
@@ -348,8 +430,10 @@ describe("Basic checks", function () {
                 await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
                 sim.deleteEvents();
                 const any_sim = sim as any;
-                any_sim.startOptions.approveAction = ButtonKind.ApproveHoldButton;
-                (any_sim.startOptions.approveKeyword = name === "stax" ? "hold" : "APPROVE"),
+                any_sim.startOptions.approveAction =
+                    ButtonKind.ApproveHoldButton;
+                (any_sim.startOptions.approveKeyword =
+                    name === "stax" || name === "flex" ? "hold" : "APPROVE"),
                     await sim.compareSnapshotsAndApprove(
                         ".",
                         `${prefix.toLowerCase()}-show_address_sign_basic`,
@@ -368,11 +452,17 @@ describe("Basic checks", function () {
                 const msgHash = Uint8Array.from(hash.update(tx).digest());
 
                 const signatureDER = resp.signature;
-                const signature = secp256k1.signatureImport(Uint8Array.from(signatureDER));
+                const signature = secp256k1.signatureImport(
+                    Uint8Array.from(signatureDER)
+                );
 
                 const pk = Uint8Array.from(respPk.compressed_pk);
 
-                const signatureOk = secp256k1.ecdsaVerify(signature, msgHash, pk);
+                const signatureOk = secp256k1.ecdsaVerify(
+                    signature,
+                    msgHash,
+                    pk
+                );
                 expect(signatureOk).toEqual(true);
             } finally {
                 await sim.close();
